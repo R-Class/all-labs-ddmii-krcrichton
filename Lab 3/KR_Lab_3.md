@@ -103,7 +103,7 @@ Apply color and plot transit time.
 
 ``` r
 color.order <- transport.vector[tract.order]
-plot(syr, border="gray80", col=color.order, main="Travel Time to Work")
+plot(syr, border=FALSE, col=color.order, main="Travel Time to Work")
 
 legend.ranges <- c("10020 - 12752 min","12753 - 15484 min","15485 - 18216 min","18217 - 20948 min","20949 - 23680 min")
 
@@ -133,7 +133,7 @@ Apply color and plot transit time.
 
 ``` r
 color.order <- SM_Above.vector[tract.order]
-plot(syr, border="gray80", col=color.order, main="Single Mothers Above the Poverty Line")
+plot(syr, border=FALSE, col=color.order, main="Single Mothers Above the Poverty Line")
 
 legend.ranges <- c("0 - 44","45 - 88","89 - 132","133 - 176","177 - 218")
 legend("bottomright", bg="white", pch=19, pt.cex=1.5, cex=0.7, legend=legend.ranges, col=color.ramp)
@@ -162,7 +162,7 @@ Apply color and plot transit time.
 
 ``` r
 color.order <- SM_Below.vector[tract.order]
-plot(syr, border="gray80", col=color.order, main="Single Mothers Below the Poverty Line")
+plot(syr, border=FALSE, col=color.order, main="Single Mothers Below the Poverty Line")
 
 legend.ranges <- c("0 - 51","52 - 102","103 - 153","154 - 204","205 - 254")
 
