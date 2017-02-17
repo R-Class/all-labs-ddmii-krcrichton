@@ -1,0 +1,137 @@
+---
+title: "Data Driven Management II - Lab 4"
+author: "Kyle Crichton"
+date: "February 15, 2017"
+output: github_document
+---
+#Setup
+
+Include relevant libararies for mapping shapefiles.
+
+```{r, warning=F, message=F }
+library(plyr)
+library(sp)
+library(maptools)
+```
+
+Read in the TIGER shapefiles for Syracuse.
+
+```{r, warning=F, message=F }
+syr <- readShapePoly(fn="C:/Users/krcrichton/Documents/R/Support_Files/01-05-2015/01-05-2015",proj4string=CRS("+proj=longlat +datum=WGS84"))
+```
+
+#Single Family Homes Per Neighborhood
+
+##Number of Single Family Homes by Neighborhood
+
+Display a table of single family homes by neighborhood in Syracuse.
+
+```{r, warning=F, message=F }
+table(syr$Nhood[syr$LandUse == "Single Family"])
+```
+
+##Single Family Homes Across Syracuse
+
+Setup plot by mapping colors to different neighbohoods.
+
+```{r, warning=F, message=F }
+color.Nhood <- c("cornflowerblue","chocolate","chartreuse","blueviolet","dodgerblue","deeppink3","darkturquoise","darkseagreen3","darksalmon","darkorange3","darkolivegreen4","indianred2","mediumorchid","navajowhite3","mediumvioletred","mistyrose1","royalblue1","steelblue3","tomato","snow3","slateblue3","mediumpurple4","lightblue2","mistyrose4","thistle1","gold2","firebrick","olivedrab3","springgreen2","cyan3","grey27", "darkkhaki")
+palette(color.Nhood)
+
+Nhood.Color <- factor(syr$Nhood)
+Nhood.Color[syr$LandUse != "Single Family"] <- NA
+```
+
+Map single family homes in each neighborhood.  Colors signify different neighborhoods.
+
+```{r, warning=F, message=F, fig.width = 10  }
+plot(syr, border="grey95", col=Nhood.Color, main="Single Family Homes By Neighborhood")
+
+legend("bottomright", bg="white", pch=19, pt.cex=0.8, cex=0.5, legend=levels(syr$Nhood), col=color.Nhood)
+```
+
+#Land Value of Homes Across Syracuse
+
+##Percent of Homes valued over $200K by Neighborhood
+
+Display a table of single family homes valued over $200k as a percentage of all single family homes by neighborhood. 
+
+```{r, warning=F, message=F }
+syr$IS_SF <- ifelse(syr$LandUse == 'Single Family', 1, 0)
+syr$IS_SF200K <- ifelse(syr$LandUse == "Single Family" & syr$AssessedVa > 200000, 1, 0)
+
+Nhood.SF <- aggregate(syr$IS_SF, by = list(syr$Nhood), FUN = sum)
+Nhood.SF200K <- aggregate(syr$IS_SF200K, by = list(syr$Nhood), FUN = sum)
+Nhood.SF200K$x <- as.character(round((Nhood.SF200K$x/Nhood.SF$x) * 100, digits = 4))
+Nhood.SF200K$x <- paste(ifelse(Nhood.SF200K$x == "NaN","0", Nhood.SF200K$x), "%", "")
+names(Nhood.SF200K) <- c("Neighborhood", "Percent 200K+ Homes")
+Nhood.SF200K
+```
+
+##Parcel Value Per Acre Across Syracuse
+
+Create a new field for value per acre and assign colors to display.
+
+```{r, warning=F, message=F }
+syr$value.acre <- syr$AssessedVa/syr$Acres
+
+color.range <- colorRampPalette( c("firebrick4","light gray","springgreen4" ) )
+color.ramp <- color.range( 10 )
+
+value.acre <- cut(rank(syr$value.acre), breaks=10, labels=color.ramp)
+value.acre <- as.character(value.acre)
+```
+
+Plot the value per acre of parcels in the city of Syracuse.
+
+```{r, warning=F, message=F, fig.width = 10 }
+plot(syr, border=FALSE, col=value.acre, main="Value of Parcels in Syracuse")
+
+legend.ranges <- c("0-130K","130-270K","270-340K","340-400K","400-460K","460-520K","520-590K","590-670K","670-820K", "820K+")
+legend("bottomright", bg="white", pch=19, pt.cex=1.5, cex=0.7, legend=legend.ranges, col=color.ramp)
+```
+
+#Age of Homes Across Syracuse
+
+##Age Percentile by Neighborhood
+
+Store percentiles as a vector
+
+```{r, warning=F, message=F }
+Ptiles <- c(0.1, 0.25, 0.5, 0.75, 0.9)
+```
+
+Store logical condition for residential houses.
+
+```{r, warning=F, message=F }
+residential <- syr$LandUse == "Single Family" | syr$LandUse == "Two Family" | syr$LandUse == "Three Family" | syr$LandUse == "Multiple Residence" | syr$LandUse == "Apartment"
+```
+
+Store residential year built data and convert to integer age of home.  Also it is quite illogical to have to convert factors to characters before converting to integers.  This tripped me up for a good two hours.  Come on R, two conversions... really?
+
+```{r, warning=F, message=F }
+syr$Home.Age <- 2017 - as.integer(as.character(syr$YearBuilt))
+Home.Age <- as.data.frame(syr[residential, c("Nhood", "Home.Age")])
+
+by(Home.Age$Home.Age, Home.Age$Nhood, function(x) quantile(Home.Age$Home.Age, Ptiles, na.rm = TRUE))
+```
+
+##Age of Homes Across Syracuse
+
+Applies colors to decade of building constuction
+
+```{r, warning=F, message=F }
+color.range <- colorRampPalette( c("steelblue4","grey95") )
+color.ramp <- color.range(13)
+age.home <- cut(as.integer(as.character(syr$YearBuilt)), breaks=c(1790,1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,2020), labels=color.ramp)
+age.home <- as.character(age.home)
+```
+
+Plot the age of home in the city of Syracuse.
+
+```{r, warning=F, message=F, fig.width = 10 }
+plot(syr, border=FALSE, col=age.home, main="Age of Homes in Syracuse")
+
+legend.ranges <- c("Pre-1900","1900s","1910s","1920s","1930s","1940s","1950s","1960s","1970s","1980s","1990s","2000s","2010s")
+legend("bottomright", bg="white", pch=19, pt.cex=1.5, cex=0.7, legend=legend.ranges, col=color.ramp)
+```
