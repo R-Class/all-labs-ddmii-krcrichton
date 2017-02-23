@@ -306,3 +306,26 @@ Join aggegrated crime data to homes datset
 tract.order <- match(dat$fips, crime.agg$FIPS)
 dat$crimes <- crime.agg$Crimes[tract.order]
 ```
+
+Prepare plot colors by crime.
+
+``` r
+color.range <- colorRampPalette( c("steelblue4","light gray","firebrick4") )
+color.ramp <- color.range( 10 )
+crime.color <- cut(rank(crime.agg$Crimes), breaks=10, labels=color.ramp)
+crime.color <- as.character(crime.color)
+crime.order <- match(syr$GEOID, crime.agg$FIPS)
+crime.color <- crime.color[crime.order]
+```
+
+Plot crimes by census tract and house locations.
+
+``` r
+plot(syr, border="white", col=crime.color, main="Crime in the Syracuse Area", xlim=c(-76.2, -76.1), ylim=c(43.0, 43.1))
+points(dat$coords, pch=20, cex = 0.9, col="darkorange1")
+
+legend.ranges <- c("1 - 5","6 - 10","11 - 14","15 - 19","20 - 23","24 - 27","28 - 32","33 - 36","37 - 41","42 - 45")
+legend("bottomright", bg="white", pch=19, pt.cex=1.5, cex=0.7, legend=legend.ranges, col=color.ramp)
+```
+
+![](KR_Lab_5_files/figure-markdown_github/unnamed-chunk-33-1.png)
