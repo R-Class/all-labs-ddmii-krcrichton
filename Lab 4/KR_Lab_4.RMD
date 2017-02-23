@@ -47,7 +47,7 @@ Map single family homes in each neighborhood.  Colors signify different neighbor
 ```{r, warning=F, message=F, fig.width = 10  }
 plot(syr, border="grey95", col=Nhood.Color, main="Single Family Homes By Neighborhood")
 
-legend("bottomright", bg="white", pch=19, pt.cex=0.8, cex=0.5, legend=levels(syr$Nhood), col=color.Nhood)
+legend("bottomright", bg="white", pch=19, pt.cex=0.8, cex=0.4, legend=levels(syr$Nhood), col=color.Nhood)
 ```
 
 #Land Value of Homes Across Syracuse

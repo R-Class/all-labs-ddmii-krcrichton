@@ -1,7 +1,7 @@
 Data Driven Management II - Lab 3
 ================
 Kyle Crichton
-February 14, 2017
+February 13, 2017
 
 Setup
 =====
